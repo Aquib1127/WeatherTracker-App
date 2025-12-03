@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather Application:</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <main id="app">
+        <header class="topbar">
+            <h1 class="app-title">
+                🌦️ Weather<span class="highlight">Tracker</span>
+                <span class="title-underline"></span>
+            </h1>
+            <div class="controls">
+                <div class="search">
+                    <input id="cityInput" type="search" placeholder="Search city" />
+                    <button id="searchBtn" aria-label="Search">Search</button>
+                </div>
+                <div class="toggle">
+                    <label class="switch">
+                        <input id="tempToggle" type="checkbox" />
+                        <span class="slider"></span>
+                    </label>
+                    <small id="unitLabel">°C</small>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+            <aside class="left-panel">
+                <div class="current-card card">
+                    <div class="meta">
+                        <h2 id="cityName">—</h2>
+                        <p id="timeLocal" class="muted">—</p>
+                    </div>
+                    <div class="weather-main">
+                        <div class="icon-wrap" id="weatherIcon" aria-hidden="true"></div>
+                        <div class="temp-wrap">
+                            <div id="tempValue" class="temp">--</div>
+                            <div class="desc" id="weatherDesc">—</div>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div><strong id="humidity">--</strong><span> Humidity</span></div>
+                        <div><strong id="wind">--</strong><span> Wind (m/s)</span></div>
+                        <div><strong id="aqi">--</strong><span> Air Quality</span></div>
+                        <div><strong id="sunTimes">--</strong><span>Sunrise / Sunset</span></div>
+                    </div>
+                </div>
+                <div class="recent card">
+                    <h3>Recent searches</h3>
+                    <ul id="recentList" class="recent-list"></ul>
+                </div>
+            </aside>
+
+            <section class="right-panel">
+                <div id="weatherCanvas" class="weather-canvas">
+                    <div class="sky-overlay"></div>
+                    <div class="stars"></div>
+                </div>
+                <div class="forecast card" id="forecastCard">
+                    <h3>5-Day Forecast</h3>
+                    <div id="forecastList" class="forecast-list"></div>
+                </div>
+            </section>
+        </section>
+
+        <footer class="footer muted">
+            Built by Aquib Ansari • Uses OpenWeatherMap API
+        </footer>
+    </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
