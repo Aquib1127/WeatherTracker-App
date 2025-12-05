@@ -17,6 +17,7 @@ const weatherIcon = document.getElementById("weatherIcon");
 const recentList = document.getElementById("recentList");
 const forecastList = document.getElementById("forecastList");
 const hourlyContainer = document.getElementById("hourlyTemps"); 
+const adviceEl = document.getElementById("weatherAdvice");
 
 // State
 let currentWeather = null;
@@ -51,6 +52,41 @@ function renderRecent() {
   });
 }
 renderRecent();
+
+function getAdvice(condition, temp, isNight) {
+  condition = condition.toLowerCase();
+  
+  if (condition.includes("rain") || condition.includes("drizzle")) {
+      return "Don't forget your umbrella! ☔ It's a wet one today.";
+  }
+  
+  if (condition.includes("thunder")) {
+      return "Stormy weather alert! ⚡ Best to stay indoors if you can.";
+  }
+  
+  if (condition.includes("snow")) {
+      return "It's freezing! ❄️ Wear a heavy coat, gloves, and a scarf.";
+  }
+  
+  if (temp > 30) {
+      return "It's scorching hot! 🥵 Stay hydrated and wear sunscreen.";
+  }
+  
+  if (temp < 10) {
+      return "It's quite cold. 🧣 A thick jacket is recommended.";
+  }
+  
+  if (condition.includes("clear")) {
+      return isNight 
+          ? "Clear skies tonight. 🌌 Perfect for stargazing!" 
+          : "It's a beautiful sunny day! 😎 Enjoy the sunshine.";
+  }
+
+  if (condition.includes("cloud")) {
+      return "It's a bit gloomy/cloudy. ☁️ A light jacket might be good.";
+  }
+  return "Have a wonderful day! 😊";
+}
 
 // Helpers C to F
 function cToF(c) {
@@ -87,12 +123,16 @@ function getLocalDateTime(timezoneOffsetSeconds) {
   return `${dateStr} • ${timeStr}`;
 }
 
-function displayTimeFromUnix(unix, tzOffsetSeconds = 0) {
+function displayTimeFromUnix(unix, timezoneOffsetSeconds) {
     // JS Date automatically converts to local browser time.
     // The easiest way to show "City Time" is to use UTC methods + offset.
-    const date = new Date(unix * 1000);
-    // This is a simplified approach for sunrise/set purely for display
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const date = new Date((unix + timezoneOffsetSeconds) * 1000);
+    // 2. Format using UTC to prevent browser from adding its own timezone again
+    return date.toLocaleTimeString("en-US", { 
+      timeZone: "UTC", 
+      hour: '2-digit', 
+      minute: '2-digit' 
+  });
 }
 
 // Icons & Animations
@@ -247,14 +287,40 @@ async function fetchWeather(city) {
   }
 }
 
+// resetUI
 function resetUI() {
-    timeLocal.textContent = "—";
-    tempValue.textContent = "--";
-    weatherDesc.textContent = "—";
-    forecastList.innerHTML = "";
-    hourlyContainer.innerHTML = "";
+
+  const adviceEl = document.getElementById("weatherAdvice");
+  if (adviceEl) adviceEl.textContent = "—";
+  
+  cityName.textContent = "City not found 😔"; 
+  timeLocal.textContent = "—";
+  tempValue.textContent = "--";
+  weatherDesc.textContent = "—";
+
+  humidityEl.textContent = "--";
+  windEl.textContent = "--";
+  sunTimesEl.textContent = "-- / --";
+
+  const aqiEl = document.getElementById("aqi");
+  if (aqiEl) {
+      aqiEl.textContent = "--";
+      aqiEl.style.color = "inherit";
+  }
+
+  forecastList.innerHTML = "";
+  hourlyContainer.innerHTML = "";
+  weatherIcon.innerHTML = "";
+
+  if (currentLocalClockInterval) {
+      clearInterval(currentLocalClockInterval);
+      currentLocalClockInterval = null;
+  }
+
+  clearAnimations(); 
 }
 
+// Update UI
 function updateUI(current, forecastRaw) {
   // Use global forecast if argument is null (occurs during Unit Toggle)
   if (!forecastRaw && lastForecast) forecastRaw = lastForecast;
@@ -285,7 +351,7 @@ function updateUI(current, forecastRaw) {
         }
     });
 
-  sunTimesEl.textContent = `${displayTimeFromUnix(current.sys.sunrise)} / ${displayTimeFromUnix(current.sys.sunset)}`;
+  sunTimesEl.textContent = `${displayTimeFromUnix(current.sys.sunrise, current.timezone)} / ${displayTimeFromUnix(current.sys.sunset, current.timezone)}`;
 
   // Temperature Display
   let tempC = current.main.temp;
@@ -294,6 +360,14 @@ function updateUI(current, forecastRaw) {
 
   // Icons & Background
   const isNight = (Date.now()/1000 > current.sys.sunset || Date.now()/1000 < current.sys.sunrise);
+
+  // Smart Advice (Now safe because isNight exists)
+  if (adviceEl) {
+    const cond = current.weather[0].main;
+    const t = current.main.temp;
+    adviceEl.textContent = getAdvice(cond, t, isNight);
+  }
+
   weatherIcon.innerHTML = createIconSVG(current.weather[0].main, isNight);
   const animClass = conditionToClass(current.weather[0].main, current.weather[0].id, isNight);
   renderAnimationsFor(animClass);

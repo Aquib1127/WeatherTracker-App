@@ -337,7 +337,9 @@ body{
     border-radius:10px; text-align:center;
 }
 .forecast-item small{ display:block; color:var(--muted); margin-top:6px; font-size:13px; }
-
+#forecastCard {
+    margin-bottom: 16px; /* 16px matches your grid gap for perfect consistency */
+}
 /* Recent list */
 .recent-list{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
 .recent-list button{
@@ -345,6 +347,9 @@ body{
     padding:8px 10px; border-radius:999px; color:var(--muted); cursor:pointer;
 }
 .recent-list button:hover{ transform:translateY(-3px); }
+.advice {
+    margin-top: 16px;
+}
 
 #timeLocal {
     margin-left: -5px;
